@@ -240,6 +240,23 @@ func (n *OpNode) initRPCServer(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
+func (n *OpNode) InitAbnormalRPCServer(ctx context.Context, cfg *Config) error {
+	server, err := newPureRPCServer(ctx, &cfg.RPC, n.log, n.appVersion)
+	if err != nil {
+		return err
+	}
+	if cfg.RPC.EnableAdmin {
+		server.EnableAbnormalAPI(NewAbnormalAPI(cfg.ConfigPersistence))
+		n.log.Info("Admin RPC enabled")
+	}
+	n.log.Info("Starting JSON-RPC server")
+	if err := server.Start(); err != nil {
+		return fmt.Errorf("unable to start RPC server: %w", err)
+	}
+	n.server = server
+	return nil
+}
+
 func (n *OpNode) initMetricsServer(ctx context.Context, cfg *Config) error {
 	if !cfg.Metrics.Enabled {
 		n.log.Info("metrics disabled")

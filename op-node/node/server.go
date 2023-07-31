@@ -28,6 +28,17 @@ type rpcServer struct {
 	sources.L2Client
 }
 
+func newPureRPCServer(ctx context.Context, rpcCfg *RPCConfig, log log.Logger, appVersion string) (*rpcServer, error) {
+	// TODO: extend RPC config with options for WS, IPC and HTTP RPC connections
+	endpoint := net.JoinHostPort(rpcCfg.ListenAddr, strconv.Itoa(rpcCfg.ListenPort))
+	r := &rpcServer{
+		endpoint:   endpoint,
+		appVersion: appVersion,
+		log:        log,
+	}
+	return r, nil
+}
+
 func newRPCServer(ctx context.Context, rpcCfg *RPCConfig, rollupCfg *rollup.Config, l2Client l2EthClient, dr driverClient, log log.Logger, appVersion string, m metrics.Metricer) (*rpcServer, error) {
 	api := NewNodeAPI(rollupCfg, l2Client, dr, log.New("rpc", "node"), m)
 	// TODO: extend RPC config with options for WS, IPC and HTTP RPC connections
@@ -46,6 +57,14 @@ func newRPCServer(ctx context.Context, rpcCfg *RPCConfig, rollupCfg *rollup.Conf
 }
 
 func (s *rpcServer) EnableAdminAPI(api *adminAPI) {
+	s.apis = append(s.apis, rpc.API{
+		Namespace:     "admin",
+		Version:       "",
+		Service:       api,
+		Authenticated: false,
+	})
+}
+func (s *rpcServer) EnableAbnormalAPI(api *abnormalAPI) {
 	s.apis = append(s.apis, rpc.API{
 		Namespace:     "admin",
 		Version:       "",

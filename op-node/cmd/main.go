@@ -113,6 +113,17 @@ func RollupNodeMain(ctx *cli.Context) error {
 	n, err := node.New(context.Background(), cfg, log, snapshotLog, VersionWithMeta, m)
 	if err != nil {
 		log.Error("Unable to create the rollup node", "error", err)
+		stateFile := ctx.String(flags.RPCAdminPersistence.Name)
+		if stateFile == "" {
+			//Modify admin_status does not depend on other business
+			log.Info("start abnormal_api because create the rollup node error ")
+			if err := n.InitAbnormalRPCServer(context.Background(), cfg); err != nil {
+				log.Error("Unable to abnormal rpc Server", "error", err)
+				return err
+			}
+			interruptNotify()
+			return nil
+		}
 		return err
 	}
 	log.Info("Starting rollup node", "version", VersionWithMeta)
@@ -162,6 +173,11 @@ func RollupNodeMain(ctx *cli.Context) error {
 		defer pprofCancel()
 	}
 
+	interruptNotify()
+	return nil
+}
+
+func interruptNotify() {
 	interruptChannel := make(chan os.Signal, 1)
 	signal.Notify(interruptChannel, []os.Signal{
 		os.Interrupt,
@@ -170,7 +186,5 @@ func RollupNodeMain(ctx *cli.Context) error {
 		syscall.SIGQUIT,
 	}...)
 	<-interruptChannel
-
-	return nil
 
 }
