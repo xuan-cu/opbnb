@@ -114,7 +114,7 @@ func RollupNodeMain(ctx *cli.Context) error {
 	if err != nil {
 		log.Error("Unable to create the rollup node", "error", err)
 		stateFile := ctx.String(flags.RPCAdminPersistence.Name)
-		if stateFile == "" {
+		if stateFile != "" {
 			//Modify admin_status does not depend on other business
 			log.Info("start abnormal_api because create the rollup node error ")
 			if err := n.InitAbnormalRPCServer(context.Background(), cfg); err != nil {

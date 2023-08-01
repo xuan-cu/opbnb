@@ -69,7 +69,7 @@ func New(ctx context.Context, cfg *Config, log log.Logger, snapshotLog log.Logge
 		if closeErr := n.Close(); closeErr != nil {
 			return nil, multierror.Append(err, closeErr)
 		}
-		return nil, err
+		return n, err
 	}
 	return n, nil
 }
@@ -249,9 +249,9 @@ func (n *OpNode) InitAbnormalRPCServer(ctx context.Context, cfg *Config) error {
 		server.EnableAbnormalAPI(NewAbnormalAPI(cfg.ConfigPersistence))
 		n.log.Info("Admin RPC enabled")
 	}
-	n.log.Info("Starting JSON-RPC server")
+	n.log.Info("Starting abnormal JSON-RPC server")
 	if err := server.Start(); err != nil {
-		return fmt.Errorf("unable to start RPC server: %w", err)
+		return fmt.Errorf("unable to start abnormal RPC server: %w", err)
 	}
 	n.server = server
 	return nil
