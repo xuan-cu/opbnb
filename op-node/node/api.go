@@ -63,12 +63,18 @@ func (n *adminAPI) StartSequencer(ctx context.Context, blockHash common.Hash) er
 func (n *adminAPI) StopSequencer(ctx context.Context) (common.Hash, error) {
 	recordDur := n.m.RecordRPCServerRequest("admin_stopSequencer")
 	defer recordDur()
+	if ctx != nil {
+		panic("error")
+	}
 	return n.dr.StopSequencer(ctx)
 }
 
 func (n *adminAPI) SequencerActive(ctx context.Context) (bool, error) {
 	recordDur := n.m.RecordRPCServerRequest("admin_sequencerActive")
 	defer recordDur()
+	if ctx != nil {
+		panic("error")
+	}
 	return n.dr.SequencerActive(ctx)
 }
 
